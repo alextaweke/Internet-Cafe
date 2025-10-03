@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["filterJson"]  // Add this line
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  role      String   @default("admin") // 'admin' or 'staff'
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Computer {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  status      String    @default("available") // 'available', 'in-use', 'maintenance'
+  hourlyRate  Float     @default(25.00)
+  sessions    Session[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Session {
+  id          Int      @id @default(autoincrement())
+  computer    Computer @relation(fields: [computerId], references: [id])
+  computerId  Int
+  user        String?
+  startTime   DateTime @default(now())
+  endTime     DateTime?
+  totalAmount Float?
+  isPaid      Boolean  @default(false)
+  payment     Payment?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Payment {
+  id          Int      @id @default(autoincrement())
+  session     Session  @relation(fields: [sessionId], references: [id])
+  sessionId   Int      @unique
+  amount      Float
+  paymentTime DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
